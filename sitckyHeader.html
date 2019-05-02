@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>StickyScrollHeader</title>
+<style>
+body{
+	padding: 0;
+	margin:0;
+}
+.scrollStickyBar {
+  background: #e64a19;
+  padding: 10px 20px;
+  position: relative;
+  z-index: 1;
+  color: #fff;
+}
+
+.scrollStickyBar.fixed {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 0;
+}
+
+.scrollStickyBar.fixed.absolute {
+  position: absolute;
+}
+
+
+
+.br{
+
+	height: 400px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="scrollStickyBar">A</div>
+<div class="br"></div>
+<div class="scrollStickyBar">B</div>
+<div class="br"></div>
+<div class="scrollStickyBar">C</div>
+<div class="br"></div>
+<div class="scrollStickyBar">D</div>
+<div class="br"></div>
+<div class="scrollStickyBar">E</div>
+<div class="br"></div>
+<div class="scrollStickyBar">F</div>
+<div class="br"></div>
+<div class="scrollStickyBar">G</div>
+<div class="br"></div>
+<div class="scrollStickyBar">H</div>
+<div class="br"></div>
+<div class="scrollStickyBar">I</div>
+<div class="br"></div>
+<div class="scrollStickyBar">J</div>
+<div class="br"></div>
+<div class="scrollStickyBar">K</div>
+<div class="br"></div>
+<div class="scrollStickyBar">L</div>
+<div class="br"></div>
+<div class="scrollStickyBar">M</div>
+<div class="br"></div>
+<div class="scrollStickyBar">N</div>
+<div class="br"></div>
+<div class="scrollStickyBar">O</div>
+<div class="br"></div>
+<div class="scrollStickyBar">P</div>
+<div class="br"></div>
+<div class="scrollStickyBar">Q</div>
+<div class="br"></div>
+<div class="scrollStickyBar">R</div>
+<div class="br"></div>
+<div class="scrollStickyBar">S</div>
+<div class="br"></div>
+<div class="scrollStickyBar">T</div>
+<div class="br"></div>
+<div class="scrollStickyBar">U</div>
+<div class="br"></div>
+<div class="scrollStickyBar">V</div>
+<div class="br"></div>
+<div class="scrollStickyBar">W</div>
+<div class="br"></div>
+<div class="scrollStickyBar">X</div>
+<div class="br"></div>
+<div class="scrollStickyBar">Y</div>
+<div class="br"></div>
+<div class="scrollStickyBar">Z</div>
+<div class="br"></div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+  var stickyHeaders = (function() {
+  var $window = $(window),
+    $stickies;
+
+  var load = function(stickies) {
+
+  	// stickies의 타입이 object인지
+  	// instanceof(해당 변수가 사용하는 prototype chain과 2번째 인자를 비교하여 true false 반환)가  jQuery를 사용하는지
+  	// stickies 변수가 비어있지않는지
+    if (
+      typeof stickies === "object" &&
+      stickies instanceof jQuery &&
+      stickies.length > 0
+    ) {
+      //stickies object에 반복문 실행 
+      $stickies = stickies.each(function() {
+      	// 인자로 들어온 stickies에 followWrap 이라는 class를 가진 div에 감싸줌
+        var $thisSticky = $(this).wrap('<div class="scrollWrap" />');
+
+        // originalPosition에 scrollStickyBar의 offset 위치, originalHeight에 해당 element의 높이를 저장
+        $thisSticky
+          .data("originalPosition", $thisSticky.offset().top)
+          .data("originalHeight", $thisSticky.outerHeight())
+           // 부모요소 followWrap에 같은 높이를 지정
+          .parent()
+          .height($thisSticky.outerHeight());
+          
+
+      });
+
+      $window.on("scroll.stickies", function() {
+        _whenScrolling();
+      });
+    }
+  };
+
+  // 스크롤시 함수
+  var _whenScrolling = function() {
+
+  	// 모든 sticky-header에 반복문
+    $stickies.each(function(i) {
+
+      var $thisSticky = $(this),
+        $stickyPosition = $thisSticky.data("originalPosition");
+
+       // 만약 scrollStickyBar의 위치가 윈도우 스크롤보다 같거나 낮을때
+      if ($stickyPosition <= $window.scrollTop()) {
+
+      	// 각각의 header의 다음순서 header에 window 내의 현재위치보다 header의 height 높이를 뺀 top위치 저장
+        var $nextSticky = $stickies.eq(i + 1),
+          $nextStickyPosition =
+            $nextSticky.data("originalPosition") -
+            $thisSticky.data("originalHeight");
+            console.log($thisSticky.data('originalPosition'));
+       
+        // fixed 클래스 추가 (기존 relative position에서 fixed로 변경)
+        $thisSticky.addClass("fixed");
+
+        if (
+          $nextSticky.length > 0 &&
+          $thisSticky.offset().top >= $nextStickyPosition
+        ) {
+          $thisSticky.addClass("absolute").css("top", $nextStickyPosition);
+        }
+
+      // scrollStickyBar의 위치가 윈도우 스크롤보다 높을때 (현재 창보다 아래의 위치)
+      } else {
+
+      	// 아래에 있는 scrollStickyBar의 하나 전의 index
+        var $prevSticky = $stickies.eq(i - 1);
+
+ 		// fixed라는 Class 제거
+        $thisSticky.removeClass("fixed");
+
+        // 올라갈수있는 scrollStickyBar 남아있고(AND), 윈도우 스크롤위치보다 지금 scrollStickyBar가 높거나 같아졌을때
+        if (
+          $prevSticky.length > 0 &&
+          $window.scrollTop() <=
+            $thisSticky.data("originalPosition") -
+              $thisSticky.data("originalHeight")
+        ) {
+          // absolute Class와 style 제거
+          $prevSticky.removeClass("absolute").removeAttr("style");
+        }
+      }
+    });
+  };
+
+  // 즉시 실행된 함수의 결과를 load에 담기
+  return {
+    load: load
+  };
+})();
+
+$(function() {
+  stickyHeaders.load($(".scrollStickyBar"));
+ });
+</script>
+</body>
+</html>
